@@ -119,14 +119,21 @@
         }
 
         .show-info h3 {
-            color: #4a5568;
+            color: #2d3748;
             font-size: 1.1rem;
+            font-weight: 700;
             margin-bottom: 0.5rem;
+        }
+
+        .show-location {
+            color: #4a5568;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
         }
 
-        .show-info h3::before {
+        .show-location::before {
             content: "📍";
             margin-right: 0.5rem;
         }
@@ -135,13 +142,10 @@
             color: #718096;
             font-size: 0.9rem;
             margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
         }
 
-        .show-manager::before {
-            content: "👤";
-            margin-right: 0.5rem;
+        .show-manager strong {
+            color: #4a5568;
         }
 
         .show-link {
@@ -322,9 +326,10 @@
                     shows.push({
                         date: row[0],
                         type: row[1] || '',
-                        location: row[2] || '',
-                        manager: row[3] || '',
-                        links: row[4] || ''
+                        showName: row[2] || '',
+                        location: row[3] || '',
+                        manager: row[4] || '',
+                        links: row[5] || ''
                     });
                 }
             }
@@ -363,9 +368,10 @@
                     <div class="show-date">${displayDate}</div>
                     <div class="show-type ${typeClass}">${show.type}</div>
                     <div class="show-info">
-                        <h3>${show.location}</h3>
+                        <h3>${show.showName}</h3>
                     </div>
-                    <div class="show-manager">${show.manager}</div>
+                    <div class="show-location">${show.location}</div>
+                    <div class="show-manager"><strong>Manager:</strong> ${show.manager}</div>
                     ${linkHtml}
                 </div>
             `;
