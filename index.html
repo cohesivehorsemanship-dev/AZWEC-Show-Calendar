@@ -1,498 +1,551 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AZWEC Show Calendar</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZWEC Show Calendar</title>
+<meta name="description" content="Upcoming Arizona Working Equitation schooling shows and USAWE rated shows.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #002868;
+    --navy-dark: #001a45;
+    --red: #BF0A30;
+    --copper: #B4501A;
+    --gold: #F2B705;
+    --sand: #F7F4EE;
+    --card: #FFFFFF;
+    --ink: #1F2633;
+    --muted: #5E6675;
+    --line: #E4DED3;
+    --schooling: #1F5FA8;
+    --schooling-bg: #E8F0FA;
+    --rated: #BF0A30;
+    --rated-bg: #FBE9EC;
+    --other: #8A5A14;
+    --other-bg: #F7EEDC;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    color: var(--ink);
+    background: var(--sand);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #C8102E 0%, #002868 50%, #FFB500 100%);
-            min-height: 100vh;
-        }
+  /* ---------- Header ---------- */
+  .masthead {
+    background: var(--navy);
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::after {               /* Arizona-flag stripe */
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: 0; height: 6px;
+    background: linear-gradient(90deg, var(--red) 0 33%, var(--gold) 33% 66%, var(--copper) 66% 100%);
+  }
+  .masthead-inner {
+    max-width: 1000px; margin: 0 auto;
+    padding: 48px 20px 44px;
+  }
+  .eyebrow {
+    font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold); font-weight: 600; margin-bottom: 10px;
+  }
+  .masthead h1 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: clamp(2rem, 5vw, 2.9rem); line-height: 1.1; font-weight: 700;
+  }
+  .masthead p.lede {
+    margin-top: 14px; max-width: 680px;
+    color: rgba(255,255,255,0.85); font-size: 1.05rem;
+  }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
 
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 2rem;
-            border-radius: 15px;
-            margin-bottom: 2rem;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-        }
+  /* ---------- About the shows ---------- */
+  .about {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin-top: -0px; padding-top: 28px;
+  }
+  .about-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 20px 22px; border-top: 4px solid var(--schooling);
+  }
+  .about-card.rated { border-top-color: var(--rated); }
+  .about-card.other { border-top-color: var(--other); background: #FCFAF5; }
+  .about-card ul.no-check li::before { content: "–"; color: var(--other); }
+  .about-card h2 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.2rem; color: var(--navy); margin-bottom: 6px;
+  }
+  .about-card .who { font-size: 0.92rem; color: var(--muted); margin-bottom: 10px; }
+  .about-card ul { list-style: none; }
+  .about-card li {
+    font-size: 0.92rem; padding-left: 20px; position: relative; margin: 4px 0;
+  }
+  .about-card li::before {
+    content: "✓"; position: absolute; left: 0; color: var(--copper); font-weight: 700;
+  }
+  .planning-note {
+    grid-column: 1 / -1;
+    background: var(--other-bg); border: 1px solid #EADBBE; border-radius: 10px;
+    padding: 14px 18px; font-size: 0.92rem; color: #5B4211;
+  }
+  .planning-note strong { color: #4A3409; }
 
-        .header h1 {
-            color: #002868;
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
+  /* ---------- Filters ---------- */
+  .toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 12px; margin: 34px 0 8px;
+  }
+  .toolbar h2 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.5rem; color: var(--navy);
+  }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font: inherit; font-size: 0.85rem; font-weight: 500;
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    padding: 6px 14px; border-radius: 999px; cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .chip:hover { border-color: var(--navy); }
+  .chip[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .count { font-size: 0.88rem; color: var(--muted); margin-bottom: 8px; }
 
-        .header p {
-            color: #C8102E;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
+  /* ---------- Show list ---------- */
+  .month {
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--copper); margin: 30px 0 10px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  .show {
+    display: grid; grid-template-columns: 96px 1fr auto; gap: 20px; align-items: center;
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 20px; margin-bottom: 10px;
+    border-left: 5px solid var(--schooling);
+  }
+  .show.rated { border-left-color: var(--rated); }
+  .show.other { border-left-color: var(--other); }
+  .show.not-azwec { background: #FCFBF8; border-left-style: dashed; }
 
-        .shows-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
+  .date-block { text-align: center; line-height: 1.15; }
+  .date-block .mon {
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--red);
+  }
+  .date-block .day {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.7rem; font-weight: 700; color: var(--navy); margin: 2px 0;
+    white-space: nowrap;
+  }
+  .date-block .day.long { font-size: 1.25rem; }
+  .date-block .dow { font-size: 0.75rem; color: var(--muted); }
 
-        .show-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-            border-left: 5px solid #FFB500;
-            backdrop-filter: blur(10px);
-        }
+  .details h3 { font-size: 1.08rem; font-weight: 700; color: var(--ink); line-height: 1.3; }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 8px; }
+  .badge {
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 4px;
+  }
+  .badge.schooling { background: var(--schooling-bg); color: var(--schooling); }
+  .badge.rated { background: var(--rated-bg); color: var(--rated); }
+  .badge.other { background: var(--other-bg); color: var(--other); }
+  .badge.azwec { background: #E7F4EC; color: #1E6B3C; }
+  .badge.not-azwec { background: #EEECE8; color: #6B655B; }
+  .meta { font-size: 0.9rem; color: var(--muted); }
+  .meta div { margin: 1px 0; }
+  .meta .label { font-weight: 600; color: var(--ink); }
+  .not-azwec-note { font-size: 0.82rem; color: #7A5A1E; font-style: italic; margin-top: 6px; }
 
-        .show-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
-        }
+  .btn {
+    display: inline-block; white-space: nowrap; text-decoration: none;
+    font-size: 0.88rem; font-weight: 600;
+    padding: 9px 16px; border-radius: 6px;
+    background: var(--navy); color: #fff; border: 1px solid var(--navy);
+    transition: background .15s;
+  }
+  .btn:hover { background: var(--navy-dark); }
+  .btn.disabled {
+    background: transparent; color: #9AA0AA; border: 1px dashed #C9CDD3;
+    cursor: default; font-weight: 500;
+  }
 
-        .show-card.licensed {
-            border-left-color: #C8102E;
-        }
+  .status {
+    text-align: center; padding: 40px 20px; color: var(--muted);
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px; margin-top: 16px;
+  }
+  .status.error { color: #7A1F1F; background: #FDF0F0; border-color: #F1CACA; }
 
-        .show-card.schooling {
-            border-left-color: #002868;
-        }
+  footer {
+    text-align: center; font-size: 0.82rem; color: var(--muted);
+    padding: 40px 20px 50px;
+  }
 
-        .show-date {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .show-date::before {
-            content: "📅";
-            margin-right: 0.5rem;
-        }
-
-        .show-type {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .show-type.licensed {
-            background: rgba(200, 16, 46, 0.1);
-            color: #C8102E;
-        }
-
-        .show-type.schooling {
-            background: rgba(0, 40, 104, 0.1);
-            color: #002868;
-        }
-
-        .show-info {
-            margin-bottom: 1rem;
-        }
-
-        .show-info h3 {
-            color: #2d3748;
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .show-location {
-            color: #4a5568;
-            font-size: 0.95rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .show-location::before {
-            content: "📍";
-            margin-right: 0.5rem;
-        }
-
-        .show-manager {
-            color: #718096;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        .show-manager strong {
-            color: #4a5568;
-        }
-
-        .show-link {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-        }
-
-        .show-link.active {
-            background: #FFB500;
-            color: #002868;
-        }
-
-        .show-link.active:hover {
-            background: #e6a300;
-            transform: translateY(-1px);
-        }
-
-        .show-link.inactive {
-            background: #e2e8f0;
-            color: #a0aec0;
-            cursor: not-allowed;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 3rem;
-            color: white;
-            font-size: 1.2rem;
-        }
-
-        .error {
-            background: rgba(254, 178, 178, 0.9);
-            color: #742a2a;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            text-align: center;
-        }
-
-        .stats {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-around;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-item {
-            flex: 1;
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #002868;
-            display: block;
-        }
-
-        .stat-label {
-            color: #718096;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        @media (max-width: 768px) {
-            .shows-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .stats {
-                flex-direction: column;
-                gap: 1rem;
-            }
-        }
-    </style>
+  @media (max-width: 900px) {
+    .about { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 720px) {
+    .show { grid-template-columns: 72px 1fr; gap: 14px; padding: 14px 16px; }
+    .show .action { grid-column: 1 / -1; }
+    .show .action .btn { display: block; text-align: center; }
+    .date-block .day { font-size: 1.4rem; }
+    .date-block .day.long { font-size: 1.05rem; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>AZWEC Show Calendar</h1>
-            <p>Arizona Working Equitation Scheduled Shows</p>
-        </div>
 
-        <div id="stats" class="stats" style="display: none;">
-            <div class="stat-item">
-                <span id="totalShows" class="stat-number">0</span>
-                <span class="stat-label">Total Shows</span>
-            </div>
-            <div class="stat-item">
-                <span id="licensedShows" class="stat-number">0</span>
-                <span class="stat-label">Licensed Shows</span>
-            </div>
-            <div class="stat-item">
-                <span id="schoolingShows" class="stat-number">0</span>
-                <span class="stat-label">Schooling Shows</span>
-            </div>
-        </div>
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="eyebrow">Arizona Working Equitation Club</div>
+    <h1>AZWEC Show Calendar</h1>
+    <p class="lede">AZWEC hosts both Schooling Shows and official USAWE Licensed Shows throughout the year. Here's what each type offers and how the scores count.</p>
+  </div>
+</header>
 
-        <div id="loading" class="loading" style="display: none;">
-            Loading show data...
-        </div>
+<main class="wrap">
 
-        <div id="error" class="error" style="display: none;"></div>
-
-        <div id="showsContainer" class="shows-grid"></div>
+  <section class="about" aria-label="About our shows">
+    <div class="about-card">
+      <h2>AZWEC Schooling Shows</h2>
+      <p class="who">Levels 1–4 · Judged by a local Arizona judge</p>
+      <ul>
+        <li>Scores count toward AZWEC Year End Awards</li>
+        <li>Qualifying scores for the AZWEC Finals each December</li>
+      </ul>
     </div>
+    <div class="about-card rated">
+      <h2>USAWE Licensed Shows organized by AZWEC</h2>
+      <p class="who">All levels · Judged by a USAWE approved judge</p>
+      <ul>
+        <li>Scores count toward AZWEC Year End Awards</li>
+        <li>Qualifying scores for the AZWEC Finals each December</li>
+        <li>USAWE qualifying scores for Regional Finals</li>
+        <li>USAWE Year End Awards</li>
+      </ul>
+    </div>
+    <div class="about-card other">
+      <h2>Other Licensed &amp; Schooling Shows</h2>
+      <p class="who">Not organized by AZWEC · Listed for planning</p>
+      <ul class="no-check">
+        <li>Scores <strong>do not</strong> count toward AZWEC Year End Awards</li>
+        <li>Scores <strong>do not</strong> count as AZWEC Finals qualifying scores</li>
+        <li>Included to help members plan their show season</li>
+      </ul>
+    </div>
+  </section>
 
-    <script>
-        let showData = [];
+  <div class="toolbar">
+    <h2>Upcoming Shows</h2>
+    <div class="filters" id="filters" role="group" aria-label="Filter shows"></div>
+  </div>
+  <p class="count" id="count"></p>
 
-        // Function to parse date and sort shows chronologically
-        function parseShowDate(dateStr) {
-            if (!dateStr) return new Date('2099-12-31');
-            
-            // Handle various date formats
-            let cleanDate = dateStr.replace(/\s+/g, ' ').trim();
-            
-            // Handle date ranges like "11/01-02 /25" or "05/16-17/26"
-            if (cleanDate.includes('-') && !cleanDate.includes('26')) {
-                // Extract the first date from range
-                let parts = cleanDate.split('-');
-                cleanDate = parts[0].trim();
-            }
-            
-            // Handle formats like "05/30 & 31/26"
-            if (cleanDate.includes('&')) {
-                let parts = cleanDate.split('&');
-                cleanDate = parts[0].trim();
-            }
-            
-            // Add century if year is 2-digit
-            if (cleanDate.match(/\/\d{2}$/)) {
-                cleanDate = cleanDate.replace(/\/(\d{2})$/, (match, year) => {
-                    return '/' + (parseInt(year) < 50 ? '20' + year : '19' + year);
-                });
-            }
-            
-            try {
-                return new Date(cleanDate);
-            } catch (e) {
-                console.warn('Could not parse date:', dateStr);
-                return new Date('2099-12-31');
-            }
-        }
+  <div id="shows">
+    <div class="status">Loading the show calendar…</div>
+  </div>
 
-        // Function to format date for display
-        function formatDisplayDate(dateStr) {
-            if (!dateStr) return '';
-            
-            // Keep the original format but clean it up
-            return dateStr.replace(/\s+/g, ' ').trim();
-        }
+</main>
 
-        // Function to process Excel data
-        function processExcelData(data) {
-            const shows = [];
-            
-            // Skip header rows (first 2 rows)
-            for (let i = 2; i < data.length; i++) {
-                const row = data[i];
-                if (row && row[0] && row[0].toString().trim()) {
-                    shows.push({
-                        date: row[0],
-                        type: row[1] || '',
-                        showName: row[2] || '',
-                        location: row[3] || '',
-                        manager: row[4] || '',
-                        links: row[5] || ''
-                    });
-                }
-            }
-            
-            // Sort shows by date
-            shows.sort((a, b) => parseShowDate(a.date) - parseShowDate(b.date));
-            
-            return shows;
-        }
+<footer>
+  Show details come straight from the AZWEC show calendar and update automatically.<br>
+  Questions about a show? Contact the show manager listed.
+</footer>
 
-        // Function to check if link is valid and active
-        function isValidLink(link) {
-            if (!link) return false;
-            if (link === 'Entry Form Here' || link === 'Entry Forms here') return false;
-            return link.startsWith('http');
-        }
+<script>
+  // ================================================================
+  //  SETTINGS
+  // ================================================================
+  // Published-to-web CSV link for the show calendar Google Sheet
+  const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTmx2O8RzxSLBYBjBA4W8ekzoYi_jVlxZZtdEXICykeYKfAwMvfYG5xqXlZpBIUY4Da9fUTC1DVtXOS/pub?output=csv';
 
-        // Function to create show card HTML
-        function createShowCard(show) {
-            const typeClass = show.type.toLowerCase().includes('licensed') ? 'licensed' : 'schooling';
-            const displayDate = formatDisplayDate(show.date);
-            
-            const hasValidLink = isValidLink(show.links);
-            const linkClass = hasValidLink ? 'active' : 'inactive';
-            const linkText = hasValidLink ? 'More Info' : 'Info Coming Soon';
-            
-            let linkHtml = '';
-            if (hasValidLink) {
-                linkHtml = `<a href="${show.links}" target="_blank" class="show-link ${linkClass}">${linkText}</a>`;
-            } else {
-                linkHtml = `<button class="show-link ${linkClass}" disabled>${linkText}</button>`;
-            }
-            
-            return `
-                <div class="show-card ${typeClass}">
-                    <div class="show-date">${displayDate}</div>
-                    <div class="show-type ${typeClass}">${show.type}</div>
-                    <div class="show-info">
-                        <h3>${show.showName}</h3>
-                    </div>
-                    <div class="show-location">${show.location}</div>
-                    <div class="show-manager"><strong>Manager:</strong> ${show.manager}</div>
-                    ${linkHtml}
-                </div>
-            `;
-        }
+  // Columns are found by their HEADER WORDS, so you can add, remove or
+  // reorder columns in the sheet without breaking the page — just keep
+  // these words somewhere in the header text.
+  const COLUMN_KEYWORDS = {
+    date:     ['date'],
+    type:     ['type'],
+    name:     ['name'],
+    location: ['location'],
+    manager:  ['manager'],
+    link:     ['info', 'regist', 'link'],
+    azwec:    ['count', 'azwec']
+  };
 
-        // Function to update statistics
-        function updateStats(shows) {
-            const totalShows = shows.length;
-            const licensedShows = shows.filter(show => 
-                show.type.toLowerCase().includes('licensed')
-            ).length;
-            const schoolingShows = totalShows - licensedShows;
-            
-            document.getElementById('totalShows').textContent = totalShows;
-            document.getElementById('licensedShows').textContent = licensedShows;
-            document.getElementById('schoolingShows').textContent = schoolingShows;
-            document.getElementById('stats').style.display = 'flex';
-        }
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const MON = MONTHS.map(m => m.slice(0, 3));
+  const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-        // Function to render shows
-        function renderShows(shows) {
-            const container = document.getElementById('showsContainer');
-            
-            if (shows.length === 0) {
-                container.innerHTML = '<div class="error">No show data found. Please upload a valid Excel file.</div>';
-                return;
-            }
-            
-            const showsHtml = shows.map(createShowCard).join('');
-            container.innerHTML = showsHtml;
-            
-            updateStats(shows);
-        }
+  let allShows = [];
+  let activeFilter = 'all';
 
-        // Google Sheets configuration
-        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTmx2O8RzxSLBYBjBA4W8ekzoYi_jVlxZZtdEXICykeYKfAwMvfYG5xqXlZpBIUY4Da9fUTC1DVtXOS/pub?output=csv';
+  // ---------------- CSV parsing (handles commas & line breaks in cells)
+  function parseCSV(text) {
+    const rows = []; let row = []; let cell = ''; let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQuotes) {
+        if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+        else if (c === '"') inQuotes = false;
+        else cell += c;
+      } else if (c === '"') inQuotes = true;
+      else if (c === ',') { row.push(cell); cell = ''; }
+      else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+      else if (c !== '\r') cell += c;
+    }
+    row.push(cell); rows.push(row);
+    return rows.map(r => r.map(v => v.trim()));
+  }
 
-        // Function to load data from Google Sheets
-        async function loadFromGoogleSheets() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('error').style.display = 'none';
-            
-            try {
-                // Try to fetch with no-cors mode to handle CORS issues
-                const response = await fetch(GOOGLE_SHEET_URL, {
-                    mode: 'cors',
-                    headers: {
-                        'Accept': 'text/csv'
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const csvText = await response.text();
-                console.log('CSV data received:', csvText.substring(0, 200) + '...'); // Log first 200 chars for debugging
-                
-                const rows = csvText.split('\n').map(row => {
-                    // Simple CSV parsing - handles basic cases
-                    const cells = [];
-                    let current = '';
-                    let inQuotes = false;
-                    
-                    for (let i = 0; i < row.length; i++) {
-                        const char = row[i];
-                        if (char === '"') {
-                            inQuotes = !inQuotes;
-                        } else if (char === ',' && !inQuotes) {
-                            cells.push(current.trim());
-                            current = '';
-                        } else {
-                            current += char;
-                        }
-                    }
-                    cells.push(current.trim());
-                    return cells;
-                });
-                
-                console.log('Parsed rows:', rows.slice(0, 5)); // Log first 5 rows for debugging
-                
-                showData = processExcelData(rows);
-                renderShows(showData);
-                
-            } catch (error) {
-                console.error('Error details:', error);
-                // Fall back to sample data if Google Sheets fails
-                console.log('Falling back to sample data...');
-                loadSampleData();
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-            }
-        }
+  // ---------------- Find the header row and map columns
+  function mapColumns(rows) {
+    const headerIndex = rows.findIndex(r => r.some(c => c.toLowerCase() === 'date'));
+    if (headerIndex === -1) throw new Error('Could not find a header row with a "Date" column.');
+    const headers = rows[headerIndex].map(h => h.toLowerCase());
+    const cols = {};
+    const used = new Set();
+    for (const [key, words] of Object.entries(COLUMN_KEYWORDS)) {
+      const idx = headers.findIndex((h, i) => !used.has(i) && words.some(w => h.includes(w)));
+      cols[key] = idx;
+      if (idx !== -1) used.add(idx);
+    }
+    return { headerIndex, cols };
+  }
 
-        // Fallback sample data function
-        function loadSampleData() {
-            const sampleData = [
-                ["AZWEC Show Calendar"],
-                ["Date", "Show Type", "Location", "Manager", "Links"],
-                ["08/31/25", "Schooling", "4 Star Ranch, Chino Valley", "Judy MacKenzie / Susan Hapak", "https://www.facebook.com/p/4-Star-Ranch-Chino-Valley-AZ-100064331363647/"],
-                ["09/20/25", "Licensed", "Payson Event Center, Payson AZ", "Vicki Clayton / Tessa Nicolet", "Entry Form Here"],
-                ["09/21/25", "Licensed", "Payson Event Center, Payson AZ", "Vicki Clayton / Tessa Nicolet", "Entry Form Here"],
-                ["10/18/25", "Schooling", "4 Star Ranch, Chino Valley AZ", "Judy MacKenzie/ Susan Hapak", "https://www.facebook.com/p/4-Star-Ranch-Chino-Valley-AZ-100064331363647/"],
-                ["11/01-02 /25", "Licensed", "Hill Ranch, Cornville AZ", "Robin Lindsey"],
-                ["12/06/25", "Licensed", "Sonoita Finals Show", "Amy Star/ Tessa Nicolet"]
-            ];
-            
-            showData = processExcelData(sampleData);
-            renderShows(showData);
-            
-            // Show a notice that we're using sample data
-            document.getElementById('error').textContent = 'Note: Currently showing sample data. Google Sheets connection will work once hosted on GitHub Pages.';
-            document.getElementById('error').style.display = 'block';
-            document.getElementById('error').style.background = 'rgba(255, 243, 205, 0.9)';
-            document.getElementById('error').style.color = '#744210';
-        }
+  // ---------------- Date parsing
+  // Handles: 10/25/26 · 01/10/2027 · 02/13-14/2027 · 12/04 - 06/26
+  //          06/05-06/06 2027 · 05/30 & 31/26 · 05/29-30 (year borrowed from row above)
+  function parseDateRange(raw, fallbackYear) {
+    let s = (raw || '').trim().replace(/&/g, '-').replace(/\s+/g, ' ');
+    if (!s) return null;
 
-        // Load data when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            loadFromGoogleSheets();
-        });
-    </script>
+    let year = null;
+    const slashCount = (s.match(/\//g) || []).length;
+    let m = s.match(/(?:\/|\s)(\d{4})$/) || (slashCount >= 2 ? s.match(/\/(\d{2})$/) : null);
+    if (m) {
+      year = parseInt(m[1], 10);
+      if (year < 100) year += 2000;
+      s = s.slice(0, m.index).trim();
+    }
+    if (!year) year = fallbackYear || new Date().getFullYear();
+
+    const parts = s.split(/\s*-\s*/);
+    const start = parts[0].split('/').map(n => parseInt(n, 10));
+    if (start.length < 2 || start.some(isNaN)) return null;
+    const [sm, sd] = start;
+
+    let em = sm, ed = sd;
+    if (parts[1]) {
+      const end = parts[1].split('/').map(n => parseInt(n, 10));
+      if (end.length >= 2 && !end.some(isNaN)) { em = end[0]; ed = end[1]; }
+      else if (!isNaN(end[0])) { ed = end[0]; }
+    }
+    const startDate = new Date(year, sm - 1, sd);
+    const endYear = em < sm ? year + 1 : year;          // e.g. 12/30 - 01/02
+    const endDate = new Date(endYear, em - 1, ed);
+    if (isNaN(startDate) || isNaN(endDate)) return null;
+    return { start: startDate, end: endDate };
+  }
+
+  function dateBlock(show) {
+    if (!show.start) {
+      return `<div class="date-block"><div class="day long">${esc(show.rawDate || 'TBD')}</div></div>`;
+    }
+    const s = show.start, e = show.end;
+    const sameDay = s.getTime() === e.getTime();
+    const sameMonth = s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear();
+    let mon, day, dow;
+    if (sameDay) {
+      mon = MON[s.getMonth()]; day = s.getDate(); dow = DOW[s.getDay()];
+    } else if (sameMonth) {
+      mon = MON[s.getMonth()]; day = `${s.getDate()}–${e.getDate()}`; dow = `${DOW[s.getDay()]} – ${DOW[e.getDay()]}`;
+    } else {
+      mon = `${MON[s.getMonth()]} – ${MON[e.getMonth()]}`;
+      day = `${s.getDate()}–${e.getDate()}`; dow = `${DOW[s.getDay()]} – ${DOW[e.getDay()]}`;
+    }
+    const long = String(day).length > 4 ? ' long' : '';
+    return `<div class="date-block">
+              <div class="mon">${mon}</div>
+              <div class="day${long}">${day}</div>
+              <div class="dow">${dow}</div>
+            </div>`;
+  }
+
+  // ---------------- Helpers
+  function esc(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  // Tidy capitalization so "practice show" and "Practice Show" count as one type
+  function titleCase(s) {
+    return s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+  }
+  function typeInfo(rawType) {
+    const clean = (rawType || '').trim().replace(/\s+/g, ' ');
+    const t = clean.toLowerCase();
+    if (t.includes('licensed')) return { cls: 'rated', label: 'Licensed' };
+    if (t.includes('schooling')) return { cls: 'schooling', label: 'Schooling' };
+    return { cls: 'other', label: clean ? titleCase(clean) : 'Other' };
+  }
+  function cleanLink(link) {
+    const l = (link || '').trim();
+    if (/^https?:\/\//i.test(l)) return l;
+    if (/^www\./i.test(l)) return 'https://' + l;
+    return null;
+  }
+
+  // ---------------- Build show objects from the sheet
+  function buildShows(rows) {
+    const { headerIndex, cols } = mapColumns(rows);
+    const get = (r, key) => (cols[key] >= 0 ? (r[cols[key]] || '') : '');
+    const shows = [];
+    let lastYear = null;
+
+    for (const r of rows.slice(headerIndex + 1)) {
+      const rawDate = get(r, 'date');
+      const name = get(r, 'name');
+      if (!rawDate && !name) continue;                       // skip blank rows
+
+      const range = parseDateRange(rawDate, lastYear);
+      if (range) lastYear = range.start.getFullYear();
+
+      const azwecNote = get(r, 'azwec');
+      const notAzwec = /\bnot\b/i.test(azwecNote);
+      const type = typeInfo(get(r, 'type'));
+
+      shows.push({
+        rawDate, name,
+        start: range ? range.start : null,
+        end: range ? range.end : null,
+        type,
+        location: get(r, 'location'),
+        manager: get(r, 'manager'),
+        link: cleanLink(get(r, 'link')),
+        notAzwec
+      });
+    }
+
+    // Hide shows that have already finished
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const upcoming = shows.filter(s => !s.end || s.end >= today);
+
+    // Sort by start date (undated shows go last)
+    upcoming.sort((a, b) => {
+      if (!a.start) return 1;
+      if (!b.start) return -1;
+      return a.start - b.start || a.name.localeCompare(b.name);
+    });
+    return upcoming;
+  }
+
+  // ---------------- Render
+  function matchesFilter(show) {
+    if (activeFilter === 'all') return true;
+    if (activeFilter === 'azwec') return !show.notAzwec;
+    if (activeFilter === 'not-azwec') return show.notAzwec;
+    if (activeFilter.startsWith('type:')) return show.type.label === activeFilter.slice(5);
+    return true;
+  }
+
+  function showRow(show) {
+    const classes = ['show', show.type.cls, show.notAzwec ? 'not-azwec' : ''].join(' ');
+    const azwecBadge = show.notAzwec
+      ? '<span class="badge not-azwec">Not AZWEC</span>'
+      : '<span class="badge azwec">AZWEC Show</span>';
+    const button = show.link
+      ? `<a class="btn" href="${esc(show.link)}" target="_blank" rel="noopener">More Info &amp; Entries</a>`
+      : `<span class="btn disabled">Details coming soon</span>`;
+    return `
+      <article class="${classes}">
+        ${dateBlock(show)}
+        <div class="details">
+          <h3>${esc(show.name || 'Show name TBD')}</h3>
+          <div class="badges">
+            <span class="badge ${show.type.cls}">${esc(show.type.label)}</span>
+            ${azwecBadge}
+          </div>
+          <div class="meta">
+            ${show.location ? `<div>📍 ${esc(show.location)}</div>` : ''}
+            ${show.manager ? `<div><span class="label">Manager:</span> ${esc(show.manager)}</div>` : ''}
+          </div>
+          ${show.notAzwec ? '<div class="not-azwec-note">Listed for planning only — does not count toward AZWEC Year End Awards or Finals qualifying.</div>' : ''}
+        </div>
+        <div class="action">${button}</div>
+      </article>`;
+  }
+
+  function render() {
+    const container = document.getElementById('shows');
+    const list = allShows.filter(matchesFilter);
+    document.getElementById('count').textContent =
+      `${list.length} upcoming show${list.length === 1 ? '' : 's'}`;
+
+    if (!list.length) {
+      container.innerHTML = '<div class="status">No upcoming shows match this filter.</div>';
+      return;
+    }
+    let html = '', currentMonth = '';
+    for (const show of list) {
+      const monthLabel = show.start ? `${MONTHS[show.start.getMonth()]} ${show.start.getFullYear()}` : 'Date to be announced';
+      if (monthLabel !== currentMonth) {
+        html += `<div class="month">${monthLabel}</div>`;
+        currentMonth = monthLabel;
+      }
+      html += showRow(show);
+    }
+    container.innerHTML = html;
+  }
+
+  // ---------------- Filters (built from whatever types are in the sheet)
+  function buildFilters() {
+    const order = ['Schooling', 'Licensed'];
+    const types = [...new Set(allShows.map(s => s.type.label))].sort((a, b) => {
+      const ia = order.indexOf(a), ib = order.indexOf(b);
+      if (ia !== -1 || ib !== -1) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+      return a.localeCompare(b);
+    });
+    const chips = [
+      ['all', 'All shows'],
+      ['azwec', 'AZWEC shows'],
+      ...types.map(t => ['type:' + t, t]),
+      ['not-azwec', 'Not AZWEC']
+    ];
+    const box = document.getElementById('filters');
+    box.innerHTML = chips.map(([key, label]) =>
+      `<button class="chip" data-filter="${esc(key)}" aria-pressed="${key === activeFilter}">${esc(label)}</button>`
+    ).join('');
+    box.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        activeFilter = chip.dataset.filter;
+        box.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c === chip));
+        render();
+      });
+    });
+  }
+
+  // ---------------- Load
+  async function load() {
+    try {
+      const sep = SHEET_CSV_URL.includes('?') ? '&' : '?';
+      const res = await fetch(`${SHEET_CSV_URL}${sep}t=${Date.now()}`);   // avoid stale copies
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      allShows = buildShows(parseCSV(await res.text()));
+      buildFilters();
+      render();
+    } catch (err) {
+      console.error(err);
+      document.getElementById('count').textContent = '';
+      document.getElementById('shows').innerHTML =
+        '<div class="status error">We couldn\'t load the show calendar right now. Please refresh the page in a moment.</div>';
+    }
+  }
+  load();
+</script>
 </body>
 </html>
